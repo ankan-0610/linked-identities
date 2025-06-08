@@ -10,7 +10,7 @@ const sequelize = new Sequelize({
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT || '5432'),
   dialect: 'postgres',
-  models: [__dirname + '/../models'],
+  models: [Contact],
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
   dialectOptions: {
     ssl: process.env.NODE_ENV === 'production' ? {
