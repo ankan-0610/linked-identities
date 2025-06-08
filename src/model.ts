@@ -1,11 +1,7 @@
 import {
   Table, Column, Model,
-  BeforeCreate, BeforeUpdate,
   DataType, PrimaryKey, AutoIncrement, Default, HasMany
 } from 'sequelize-typescript';
-import sequelize from './database';
-import { fileFromPath } from 'openai';
-import { all } from 'axios';
 
 @Table({ tableName: 'contact' })
 class Contact extends Model {
