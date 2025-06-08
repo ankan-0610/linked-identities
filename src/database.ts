@@ -8,9 +8,15 @@ const sequelize = new Sequelize({
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   host: process.env.DB_HOST,
-  port: parseInt('5432'),
+  port: parseInt(process.env.DB_PORT || '5432'),
   dialect: 'postgres',
-  models: [Contact], 
-  logging: false,
+  models: [__dirname + '/../models'],
+  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  dialectOptions: {
+    ssl: process.env.NODE_ENV === 'production' ? {
+      require: true,
+      rejectUnauthorized: false
+    } : false
+  }
 });
 export default sequelize;
