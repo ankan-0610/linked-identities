@@ -1,4 +1,4 @@
-# linked-identities
+# linked-identities-api
 
 ### Deployed endpoint
 
