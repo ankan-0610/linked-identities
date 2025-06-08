@@ -3,7 +3,7 @@
 ### Deployed endpoint
 
 
-https://linked-identities.onrender.com
+https://linked-identities.onrender.com/identify
 
 ### How to test?
 
