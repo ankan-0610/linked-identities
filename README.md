@@ -2,9 +2,8 @@
 
 ### Deployed endpoint
 
-```url
+
 https://linked-identities.onrender.com
-```
 
 ### How to test?
 
