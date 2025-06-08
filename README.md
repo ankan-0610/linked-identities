@@ -41,3 +41,14 @@ npm start
 ```bash
 curl -X POST "http://localhost:3000/identify" -H "Content-type: application/json" -d '{"email":"abc@gmail.com","phoneNumber":"123"}'
 ```
+
+### My approach?
+
+Initially had a DSA perspective on the problem, in terms of building a Tree data structure to store contact ids, trying to minimize the DB queries. 
+
+Then I realized this is already accomplished via indexing with B-trees in a SQL database. So just neeeded to create indexes for 'email','phoneNumber','linkedId','id'.
+Then focused on completing the CRUD functionality for the API.
+
+One challenge was changing a contact's linkPrecedence from primary to secondary, in case a primary Contact gets a re-write. Then consequently the secondary contacts needed re-shuffling, as now the oldest contact in this list becomes primary, not to mention the linkedId for all these entries will change according to the new Primary contact.
+
+Feel free to check the code in src/service.ts containing the whole logic
