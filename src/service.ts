@@ -74,23 +74,80 @@ class ContactService {
       contactPairs.add({ email: contact.email, phoneNumber: contact.phoneNumber });
     });
 
-    // // Add the new data if it doesn't exist
-    // if (email) emails.add(email);
-    // if (phoneNumber) phoneNumbers.add(phoneNumber);
-
     // Check if we need to create a new secondary contact
-    const hasNewInfo = (email && phoneNumber && !contactPairs.has({ email, phoneNumber }));
-    console.log('Has new info:', hasNewInfo);
+    const hasNewInfo = !Array.from(contactPairs)
+      .some(pair => pair.email === email
+        && pair.phoneNumber === phoneNumber);
+    
+    // console.log('Has new info:', hasNewInfo);
+    // console.log('Contact pairs:', contactPairs);
+
+    let newSecondary;
     if (hasNewInfo) {
-      const newSecondary = await Contact.create({
+      newSecondary = await Contact.create({
         email,
         phoneNumber,
         linkedId: primaryContact.id,
         linkPrecedence: 'secondary',
       });
-      secondaryContacts.push(newSecondary);
-      contactPairs.add({ email: newSecondary.email, phoneNumber: newSecondary.phoneNumber });
+      
+    }else {
+      // console.log('Attempting to delete contact with email:', email, 'and phoneNumber:', phoneNumber);
+      
+      // remove current contact to update createdAt
+      await Contact.destroy({
+        where: {
+          email: email, 
+          phoneNumber: phoneNumber
+        }
+      })
+
+      if (secondaryContacts.length === 0) {
+        newSecondary = await Contact.create({
+          email,
+          phoneNumber,
+          linkPrecedence: 'primary',
+        });
+      }
+      else {
+        if (primaryContact.email === email && primaryContact.phoneNumber === phoneNumber) { 
+          
+          const prevPrimaryId = primaryContact.id;
+          
+          // find oldest in secondary Contacts, make that primary
+          const newPrimary = secondaryContacts.reduce((oldest, current) => {
+            return (oldest.createdAt < current.createdAt) ? oldest : current;
+          });
+          
+          // update primary contact in db
+          await Contact.update(
+            { linkPrecedence: 'primary' },
+            { where: { id: newPrimary.id } }
+          );
+
+          // update linkedId of all secondary contacts to the new primary contact
+          await Contact.update(
+            { linkedId: newPrimary.id },
+            { where: { linkedId: prevPrimaryId } }
+          );
+          // remove the new primary contact from secondary contacts
+          secondaryContacts.splice(secondaryContacts.indexOf(newPrimary), 1);
+
+          // remove the old primary contact from contactPairs
+          contactPairs.delete({ email: newPrimary.email, phoneNumber: newPrimary.phoneNumber });
+
+          primaryContact = newPrimary;
+        }
+        newSecondary = await Contact.create({
+          email,
+          phoneNumber,
+          linkedId: primaryContact.id,
+          linkPrecedence: 'secondary',
+        });
+      }
     }
+    secondaryContacts.push(newSecondary);
+    contactPairs.add({ email: newSecondary.email, phoneNumber: newSecondary.phoneNumber });
 
     return {
       primaryContact,
